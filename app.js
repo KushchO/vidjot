@@ -4,9 +4,10 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const flash = require('connect-flash');
-const session = require('express-session');
 const path = require('path');
 const passport = require('passport');
+const redis = require('redis');
+const session = require('express-session');
 
 const app = express();
 
@@ -44,8 +45,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(methodOverride('_method'));
 
 //Express session midleware
+let RedisStore = require('connect-redis')(session);
+let client = redis.createClient();
 app.use(
   session({
+    store: new RedisStore({ client }),
     secret: 'secret',
     resave: true,
     saveUninitialized: true
