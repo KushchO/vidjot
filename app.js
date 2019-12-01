@@ -6,8 +6,8 @@ const methodOverride = require('method-override');
 const flash = require('connect-flash');
 const path = require('path');
 const passport = require('passport');
-const redis = require('redis');
 const session = require('express-session');
+var MongoDBStore = require('connect-mongodb-session')(session);
 
 const app = express();
 
@@ -45,11 +45,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(methodOverride('_method'));
 
 //Express session midleware
-let RedisStore = require('connect-redis')(session);
-let client = redis.createClient();
+const store = new MongoDBStore({
+  uri: db.mongoURI,
+  collection: 'mySessions'
+});
 app.use(
   session({
-    store: new RedisStore({ client }),
+    store: store,
     secret: 'secret',
     resave: true,
     saveUninitialized: true
